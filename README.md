@@ -15,12 +15,19 @@ Tested system:
 
  - # Installation
 
-   - On linux you can copy this repositry by the following command: 
+   - On linux you can copy this repositry by the following command:
+ 
      $ git clone "https://github.com/Davide255/Automator"
-     Next step is installing required pakages, you can install by pip install -r requirements_linux.txt
+     
+     Next step is installing required pakages, you can install by pip 
+     
+     pip install -r requirements_linux.txt
 
    - On Windows you can downolad and extract this pakage.
-     Next, Install the pakage dipendency by pip install -r requirements_win32.txt 
+   
+     Next, Install the pakage dipendency by pip 
+     
+     pip install -r requirements_win32.txt 
 
 # Possible errors:
 
