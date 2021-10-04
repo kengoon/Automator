@@ -1,10 +1,10 @@
 # WELCOME TO AUTOMATOR
 
 This is a programm that do automations on your system
-(tested system: 
+tested system: 
   - windows10 (build 19043.1237)
   - ubuntu 20.04
-  - raspbian 10) 
+  - raspbian 10 
 
 
 # Possible errors:
