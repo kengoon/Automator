@@ -1,0 +1,566 @@
+#essential app
+from kivymd.app import MDApp
+from kivy.lang import Builder
+from kivy.metrics import dp
+from kivy.config import Config
+from kivy.core.window import Window
+from kivy.logger import Logger
+from exceptions import Errors
+
+#kivy screens
+from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, FadeTransition
+
+#kivymd widget
+from kivymd.uix.selectioncontrol import MDSwitch
+from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.label import MDLabel
+from kivymd.uix.card import MDCard
+from kivymd.uix.toolbar import MDToolbar
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.dialog import MDDialog
+
+#other components
+from threading import Thread
+from datab.database import database
+from cases import start
+import sys
+
+#Classe di widget già formattati
+class pakedWidget():
+    def switch(self, *args):
+        sw = MDSwitch(*args)
+        sw.id = 'sw'
+        sw.pos_hint = {'center_x': .80, 'center_y': .3}
+        return sw
+
+    def card(self, *args):
+        mc = MDCard(*args)
+        mc.orientation = 'vertical'
+        mc.padding = '8dp'
+        mc.size_hint = None, None
+        mc.size = "240dp", "280dp"
+        mc.elevation = 10
+        mc.border_radius = 20
+        mc.radius = [15]
+        return mc
+
+    def scrollview(self, *args):
+        sv = ScrollView(*args)
+        sv.do_scroll_x = False
+        sv.do_scroll_y = True
+        return sv
+
+    def gridlayout(self, *args):
+        gl = GridLayout(*args)
+        gl.size_hint_max_y = None
+        gl.cols = 3
+        gl.padding = "20dp"
+        gl.spacing = "20dp"
+        return gl
+
+    def boxlayout(self, *args):
+        bl = BoxLayout(*args)
+        bl.orientation = 'vertical'
+        return bl
+
+    def toolbar(self, title, *args):
+        tb = MDToolbar(*args)
+        tb.title = title
+        tb.left_action_items = [['menu', lambda x: UI.callback(UI, x)]]
+        return tb
+
+#Main class
+class UI(MDApp):
+
+    def _on_resize(self, *args):
+        Window.size = (800, 600)
+
+    def build(self, *args):
+
+        Logger.info('[GL          ] Attivo on_request_close e on_resize')
+        Window.bind(on_request_close=self.on_request_close)
+        Window.bind(on_resize=self._on_resize)
+
+        Logger.info('[GL          ] carico design.kv')
+        if sys.platform == 'linux':
+            Builder.load_file('graphic/design.kv')
+        else:
+            Builder.load_file('graphic\\design.kv')
+
+        Logger.info('[GL          ] creo UI.sm')
+        UI.sm = ScreenManager(transition=FadeTransition())
+
+        Logger.info('[GL          ] aggiungo titolo e imposto i colori')
+        self.title = "Automator"
+        self.theme_cls.theme_style = database().get_settings()['theme_style']
+        self.theme_cls.primary_palette = "Blue"
+
+        Logger.info('[GL          ] creo main screen')
+        main_screen = Screen(name='main')
+        main_screen.add_widget(widget=Screens.Main().build())
+
+        #Logger.info('[GL          ] creo settings screen')
+        #settings_screen = Screen(name='settings')
+        #settings_screen.add_widget(widget=Screens.Settings().build())
+
+        Logger.info('[GL          ] creo create_screen')
+        create_screen = Screen(name='create_screen')
+        create_screen.add_widget(widget=Screens.Create_Screen().build())
+
+        Logger.info('[GL          ] aggiungo tutti gli schermi a UI.sm')
+        self.sm.add_widget(main_screen)
+        #self.sm.add_widget(settings_screen)
+        self.sm.add_widget(Screens.Settings(name='settings'))
+        self.sm.add_widget(create_screen)
+
+        Logger.info('[GL          ] creo menu per create_screen')
+        self.build_menu(0, True)
+
+        Logger.info('[GL          ] imposto transizione')
+        self.sm.transition = SlideTransition()
+
+        Logger.info('[GL          ] mostro UI')
+
+        return self.sm
+    
+    def active_switch(self, *args):
+        try:
+            if self.theme_style == 'Dark':
+                return True
+            else:
+                return False
+        except AttributeError:
+            self.theme_style = self.theme_cls.theme_style
+            
+            if self.theme_style == 'Dark':
+                return True
+            else:
+                return False
+            
+    def change_theme_cls_theme_style(self, *args):
+        
+        if self.theme_style == 'Light':
+            self.theme_style = 'Dark'
+            snack_text = 'tema scuro attivato'
+        else:
+            self.theme_style = 'Light'
+            snack_text = 'tema scuro disattivato'
+
+        self.send_snackbar(text=snack_text)
+
+    def send_snackbar(self, **kwargs):
+        self.snackbar = Snackbar(
+        text=kwargs.get('text'),
+        snackbar_x="10dp",
+        snackbar_y="10dp",
+        )
+        self.snackbar.size_hint_x = (
+            Window.width - (self.snackbar.snackbar_x * 2)
+        ) / Window.width
+
+        try:
+            self.snackbar.buttons = kwargs.get('buttons')
+            '''[
+            MDFlatButton(
+                text="UPDATE",
+                text_color=(1, 1, 1, 1),
+                on_release=snackbar.dismiss,
+            ),
+            MDFlatButton(
+                text="CANCEL",
+                text_color=(1, 1, 1, 1),
+                on_release=snackbar.dismiss,
+            ),
+            ]'''
+        except ValueError:
+            self.snackbar.buttons = []
+
+        try:
+            self.snackbar.dismiss()
+            self.snackbar.open()
+        except AttributeError:
+            self.snackbar.open()
+
+    def show_dialog(self, **kwargs):
+
+        self.show_dialog_now = True
+
+        try:
+            try:
+                buttons = kwargs.get('buttons')
+            except AttributeError:
+                pass
+
+            self.dialog = MDDialog(
+                text='ciao',
+                buttons=buttons,
+            )
+            self.dialog.open()
+        except AttributeError:
+            pass
+
+        '''[
+                    MDFlatButton(
+                        text="CANCEL", text_color=self.theme_cls.primary_color
+                    ),
+                    MDFlatButton(
+                        text="DISCARD", text_color=self.theme_cls.primary_color
+                    ),
+                ],'''
+    
+    def on_request_close(self, *args):
+        database().get_data()
+        data = database.data
+        database().save_data(data=dict(data))
+
+    def callback(self, button):
+        self.menu.caller = button
+        self.menu.open()
+
+    def menu_save(self, *args):
+        database().set('theme_style', self.theme_style)
+        self.theme_cls.theme_style = self.theme_style
+        self.build_menu(*args)
+
+    def not_save(self, *args):
+        self.theme_cls.theme_style = self.theme_style_bakup
+        self.build_menu(*args)
+
+    def build_menu(self, *args):
+
+        try:
+            self.menu.dismiss()
+        except AttributeError:
+            pass
+
+        menu_items = [
+        #menu 0, main
+        [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"vai a Impostazioni",
+                "height": dp(56),
+                "on_release": lambda x=f"settings": self.build_menu(x, True),
+            }
+        ],
+        #menu 1, settings
+        [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"Esci senza salvare",
+                "height": dp(56),
+                "on_release": lambda x=f"main": self.not_save(x, True),
+             },
+             {
+                "viewclass": "OneLineListItem",
+                "text": f"Salva ed esci",
+                "height": dp(56),
+                "on_release": lambda x=f"main": self.menu_save(x, True),
+             }
+        ],
+        #menu 2, create_screen
+        [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"Esci senza salvare",
+                "height": dp(56),
+                "on_release": lambda x=f"main": self.not_save(x, True),
+             },
+             {
+                "viewclass": "OneLineListItem",
+                "text": f"Salva ed esci",
+                "height": dp(56),
+                "on_release": lambda: Screens.Create_Screen().confirm(),
+             }
+        ],
+        ]
+
+        if isinstance(args[0], str):
+            screens = ['main','settings','create_screen']
+            itm = screens.index(args[0])
+        elif isinstance(args[0], int):
+            itm = args[0]
+        else:
+            raise ValueError('Unricognizet type')        
+
+        UI.menu = MDDropdownMenu(
+            items=menu_items[itm],
+            width_mult=4,
+        )
+
+        if args[1] != False:
+          if isinstance(args[0], str):
+            self.sm.current = args[0]
+          elif isinstance(args[0], int):
+            screens = ['main','setting', 'create_screen']
+            self.sm.current = screens[args[0]]
+          else:
+            raise ValueError('Unricognized type')
+
+        self.theme_style = self.theme_cls.theme_style
+        self.theme_style_bakup = self.theme_style
+
+        self.theme_cls.theme_style = database().get_settings()['theme_style']
+
+        if self.sm.current == 'settings':
+            self.theme_cls.theme_style = 'Dark'
+
+        Logger.info('[GL          ] theme_style set on {}'.format(self.theme_cls.theme_style))
+
+        return self.menu
+
+    def build_cards(self):
+
+        keys = database().get_value('keys')
+
+        sv = pakedWidget().scrollview()
+        cr = pakedWidget().card()
+        gl = pakedWidget().gridlayout()
+
+        if keys == None:
+
+            lbl = MDLabel()
+            lbl.text = '+'
+            lbl.halign = 'center'
+            lbl.font_style = 'H2'
+
+            cr.bind(active=lambda *args:print('worked'))
+            cr.add_widget(lbl)
+            gl.add_widget(cr)
+            sv.add_widget(gl)
+
+            return sv
+        else:
+            data = database().get_data()
+        
+        for i in keys:
+            sw = pakedWidget().switch()
+            #sw.bind(active=lambda *args: Errors.Advises().Deactivate_Adv())
+
+            if data[i]['active'] == 'True':  
+                sw.active = True
+            else:
+                sw.active = False
+
+            cr.add_widget(sw)    
+
+            try:
+                title = data[i]['title']
+                subtitle = data[i]['subtitle']
+            except KeyError:
+                print('card must have title and a subtitle')
+                exit(0)
+
+            for v in data[i]['added_propriety']:
+                try:
+                    if v == 'text_color':
+                        text_color = data[i][v]
+                    elif v == 'text_style':
+                        text_style = data[i][v]
+                    elif v == 'bg_color':
+                        bg_color = data[i][v]
+                    else:
+                        pass
+                except KeyError or AttributeError:
+                    pass
+
+            lbl = MDLabel(text=title, font_style='H5')
+            lbl.halign = 'center'
+            lbl.valign = 'top'
+            cr.add_widget(lbl)
+
+            lbl = MDLabel(text=subtitle, text_size='10dp')
+            lbl.halign = 'center'
+            lbl.valign = 'center'
+            
+            cr.add_widget(lbl)
+            
+            gl.add_widget(cr)
+            cr = pakedWidget().card()
+
+        lbl = MDLabel()
+        lbl.text = '+'
+        lbl.halign = 'center'
+        lbl.font_style = 'H2'
+
+        cr.bind(on_release=lambda *args: UI().create_new(2, True))
+        cr.add_widget(lbl)
+        gl.add_widget(cr)
+        sv.add_widget(gl)
+
+        return sv
+
+    def _on_minimize(*args):
+        database.send_notification('prova', 'prova')
+
+    def create_new(self, *args):
+        self.build_menu(*args)
+
+#Classe di schermi
+class Screens:
+
+    class Main(Screen):
+
+        def build(self):
+            bx = pakedWidget().boxlayout()
+            bx.add_widget(pakedWidget().toolbar('Automator'))
+            sv = UI.build_cards(UI)
+            bx.add_widget(sv)
+
+            return bx        
+
+    class Settings(Screen):
+        
+        def build(self):
+            bx = pakedWidget().boxlayout()
+            bx.add_widget(pakedWidget().toolbar('Impostazioni'))
+
+            sv = pakedWidget().scrollview()
+            gl = GridLayout(row_force_default=True, cols = 4, padding = [30,30,30,30], row_default_height =  100)
+
+            lbl = MDLabel(text='tema scuro')
+            gl.add_widget(lbl)
+            switch = MDSwitch()
+            switch.active = UI().active_switch()
+            switch.bind(active=lambda *args: UI().change_theme_cls_theme_style())
+            gl.add_widget(switch)
+
+            for i in range(0,10):
+                gl.add_widget(MDLabel(text='prova'))
+                gl.add_widget(MDSwitch())
+
+            sv.add_widget(gl)
+            bx.add_widget(sv)
+
+            return bx
+
+    class Create_Screen(Screen):
+
+        def build(self):
+            from kivymd.uix.textfield import MDTextField
+            from kivymd.uix.expansionpanel import MDExpansionPanelLabel
+
+            bx = pakedWidget().boxlayout()
+            tb = pakedWidget().toolbar('Create New Automation')
+            bx.add_widget(tb)
+            sv = pakedWidget().scrollview()
+            gl = pakedWidget().gridlayout()
+
+            TitleBox = MDTextField(hint_text='Titolo', required=True, mode='fill', helper_text_mode='on_error', helper_text= "Il campo è obbligatorio")
+            DescriptionBox = MDTextField(mode='fill', hint_text= "Descrizione (opzionale)")
+
+            gl.add_widget(TitleBox)
+            gl.add_widget(DescriptionBox)
+            sv.add_widget(gl)
+            bx.add_widget(sv)
+
+            return bx
+
+        def confirm(self, *args):
+            import uuid
+            
+            data = {'card {}'.format(uuid.uuid4()):
+                    {'title':self.ids['title'].text,
+                    'subtitle': self.ids['subtitle'].text,
+                    'active': True,
+                    "actions": {
+                        "automation": [],
+                        "action_to_do": []
+                        }
+                    }
+                   }
+
+            print(data)
+            #print(database().get_data())
+            
+            #self.ids['title'].text
+
+            UI().build_menu('main', True)
+
+#Classe adibita al mostrare avvisi
+class Advises_Shower():
+
+    _dialog = None
+
+    def deactivate_alert(self):
+        print(Errors.Advises().Deactivate_Adv())
+    
+    def file_not_fount(self):
+        pass
+
+    def critical_error(self):
+        pass
+
+    def systemerror(self):
+        pass
+
+    def json_error(self):
+        from kivymd.uix.button import MDFlatButton
+        #, text_color=UI.theme_cls.primary_color
+        buttons = [
+                    MDFlatButton(
+                        text="EXIT"
+                    ),
+                    MDFlatButton(
+                        text="REPAIR")
+                ]
+        try:
+            self.dialog = MDDialog(
+                    text='Errore',
+                    buttons=buttons,
+                )
+            self.dialog.open()
+        except AttributeError:
+            pass
+
+    def open(self, _dialog_build):
+        try:
+            self._dialog = _dialog_build
+            self._dialog.open()
+        except AttributeError:
+            pass
+        
+    def close_dialog(self, *args):
+        self._dialog = args[0]
+        self._dialog.dismiss()
+
+        if args[1] == True:
+            print('disattivo')
+
+
+#metodo di boot              
+def bootstrap():
+    if len(sys.argv) > 1:
+        from cases import process
+        print(process.execshproc(sys.argv[1]))
+        exit()
+
+    import kivy
+    kivy.require('2.0.0')
+    Config.set('kivy', 'keyboard_mode', 'systemandmulti')
+
+    if sys.platform == 'linux':
+        PLATFORM = 'linux'
+        BATTERY_INFO = '/sys/class/power_supply/BAT0'
+    else:
+        PLATFORM = 'win32'
+
+    database(PLATFORM)
+    th = Thread(target=start.start)
+    th.setDaemon(True)
+    th.start()
+    UI().run()
+
+
+#Entry point
+if __name__ =='__main__':
+    PLATFORM = None
+    try:
+        bootstrap()
+    except (KeyboardInterrupt):
+        Logger.warning('Keyboard interrupt detected, abort')
+    except ChildProcessError as e:
+        Logger.warning(e)

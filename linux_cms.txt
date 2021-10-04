@@ -1,0 +1,3 @@
+wifi_ssid = /sbin/iwconfig wlan0 | grep ESSID
+
+

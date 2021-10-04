@@ -1,0 +1,4 @@
+pyscreenshot
+psutil
+kivy
+kivy-md

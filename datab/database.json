@@ -1,0 +1,30 @@
+{
+      "cards": {
+            "default": {
+                  "title": "Crea la tua prima automazione!",
+                  "subtitle": "Guida alla creazione di automazioni",
+                  "active": "True",
+                  "added_propriety": {},
+                  "actions": {
+                        "automation": [
+                              [
+                                    "Startup"
+                              ]
+                        ],
+                        "action_to_do": [
+                              [
+                                    "System",
+                                    "send_notification",
+                                    {
+                                          "title": "prova",
+                                          "msg": "prova notifica!"
+                                    }
+                              ]
+                        ]
+                  }
+            }
+      },
+      "settings": {
+            "theme_style": "Dark"
+      }
+}

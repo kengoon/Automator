@@ -1,0 +1,116 @@
+COSE DA FARE
+
+- creare gui
+
+- scrivere animazione di tutorial
+
+bakup:
+<Main>:
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDToolbar:
+            title: "Automator"
+            left_action_items: [["menu", lambda x: app.callback(x)]]
+           
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            size: self.size
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                width: self.minimum_width
+                cols: 3
+                padding: "20dp"
+                spacing: "20dp"
+
+                MDCard:
+                    orientation: "vertical"
+                    padding: '8dp'
+                    size_hint: None, None
+                    size: "240dp", "280dp"
+                    elevation: 10
+                    border_radius: 20
+                    radius: [15]
+                    on_release: print('worked')
+
+                    MDLabel:
+                        id: card_label
+                        text: '      +'
+                        haligh: 'center'
+                        valign: 'center'
+                        font_style: 'H2'
+
+                        
+
+{
+      "cards": {
+            "default": {
+                  "title": "Crea la tua prima automazione!",
+                  "subtitle": "Guida alla creazione di automazioni",
+                  "active": "True",
+                  "added_propriety": {},
+                  "actions": {
+                        "automation": [
+                              [
+                                    "Battery",
+                                    "plugged"
+                              ]
+                        ],
+                        "action_to_do": [
+                              [
+                                    "System",
+                                    "send_notification",
+                                    {
+                                          "title": "prova",
+                                          "msg": "prova notifica!"
+                                    }
+                              ]
+                        ]
+                  }
+            }
+      },
+      "settings": {
+            "theme_style": "Dark"
+      }
+}
+
+<Create_Screen>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            title: "Create New Automation"
+            left_action_items: [["menu", lambda x: app.callback(x)]]
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            size: self.size
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                width: self.minimum_width
+                cols: 2
+                padding: "20dp"
+                spacing: "40dp"
+
+                MDTextField:
+                    id: title 
+                    hint_text: "Titolo"
+                    required: True
+                    mode: 'fill'
+                    helper_text_mode: "on_error"
+                    helper_text: "Il campo è obbligatorio"
+                    #pos_hint: {'center_y': .9, 'center_x': 0.2}
+
+                MDTextField:
+                    id: subtitle
+                    mode: 'fill'
+                    hint_text: "Descrizione (opzionale)"
+                    #pos_hint: {'center_y': .9, 'center_x': 0.2}
+
+                #MDExpansionPanelLabel:
