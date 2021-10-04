@@ -1,3 +1,0 @@
-Vincitori:          Perdenti:          
-('Vincitore: player1', 'perdente: player2')
-('Vincitore: player1', 'perdente: player2')
