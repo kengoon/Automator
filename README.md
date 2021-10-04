@@ -1,7 +1,8 @@
 # WELCOME TO AUTOMATOR
 
-This is a programm that do automations on your system
-tested system: 
+This is a programm that do automations on your system.
+
+Tested system: 
   - windows10 (build 19043.1237)
   - ubuntu 20.04
   - raspbian 10 
