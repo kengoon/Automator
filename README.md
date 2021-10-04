@@ -4,7 +4,7 @@
 
 ### Tested system: 
   * windows10 (build 19043.1237)
-  * ubuntu 20.04
+  * ubuntu 20.04.03
   * raspbian 10 
 
 # Installation
