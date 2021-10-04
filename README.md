@@ -11,6 +11,4 @@ This is a programm that do automations on your system
 
 - [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider.
     
-  fix by installing xclip and xsel:
-    
-  $ sudo apt-get install xclip xsel
+  fix by installing xclip and xsel ($ sudo apt-get install xclip xsel)
