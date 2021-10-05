@@ -1,6 +1,8 @@
-# WELCOME TO AUTOMATOR
+# WELCOME TO AUTOMATOR BETA 
 
-## This programm is able to create automations on your system.
+### This programm is able to create automations on your system.
+### This programm is only an experimantal release; infact it works
+very well on Windows wether in linux did not works always correctly
 
 ### Aviable languages:
   * Italiano
