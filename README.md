@@ -53,6 +53,10 @@ very well on Windows wether in linux did not works always correctly
     - Ufficially we _**DID NOT TESTED ON MACOS X**_; there are some features
       that required bash or powershell script that (we think) probably doesn't work
 
+# How does it works?
+
+The main programm create a Thread that observe your system and it does actions consequentially.
+
 # Possible errors:
 
 - [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider. (Appared on Ubuntu 20.04.03)
