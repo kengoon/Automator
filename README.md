@@ -1,8 +1,12 @@
 # WELCOME TO AUTOMATOR
 
-## This is a programm that do automations on your system.
+## This programm is able to create automations on your system.
 
-### Tested system: 
+### Aviable languages:
+  * Italiano
+  * Caming soon: English
+
+### Tested with these systems: 
   * windows10 (build 19043.1237)
   * ubuntu 20.04.03
   * raspbian 10 
@@ -10,7 +14,7 @@
 # Installation
  - # Prerequisites
 
-   - Python 3.2 or higher
+   - Python 3.2 or higher with pip pakage manager 
    - Linux or Windows system
 
  - ## Installation
@@ -35,13 +39,16 @@
     
     - You can downolad and extract this pakage.
    
-      Next, Install the pakage dipendency by pip 
+      After, Install the pakage dipendency by pip 
      
-      <code>pip install -r requirements_win32.txt</code> 
+      <code>pip install -r requirements_win32.txt</code>
+
+    - If you have installed Visual Studio or VSCode you can copy this repository
+      and run the above pip command to install requirements 
 
 # Possible errors:
 
-- [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider.
+- [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider. (Appared on Ubuntu 20.04.03)
     
   **Fix by installing xclip and xsel (<code>$ sudo apt-get install xclip xsel</code>)**
 
