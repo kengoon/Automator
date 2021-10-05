@@ -46,6 +46,11 @@
     - If you have installed Visual Studio or VSCode you can copy this repository
       and run the above pip command to install requirements 
 
+   ### MacOs X:
+
+    - Ufficially we _**DID NOT TESTED ON MACOS X**_; there are some features
+      that required bash or powershell script that (we think) probably doesn't work
+
 # Possible errors:
 
 - [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider. (Appared on Ubuntu 20.04.03)
