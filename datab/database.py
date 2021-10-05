@@ -21,9 +21,6 @@ class database():
             database.PLATFORM = platform
             database.PATH = os.path.join(os.getcwd(), 'datab','database.json')
 
-        if not 'data' in os.getcwd():
-            os.chdir(os.path.join(os.getcwd(), 'data'))  
-
         logging.basicConfig(format='[%(levelname)-8s] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
                     level=logging.INFO)
