@@ -7,7 +7,7 @@
   * Italiano
   * Caming soon: English
 
-### Tested with these systems: 
+### Tested with those systems: 
   * windows10 (build 19043.1237)
   * ubuntu 20.04.03
   * raspbian 10 
