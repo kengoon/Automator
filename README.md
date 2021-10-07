@@ -15,7 +15,7 @@
 # Installation
  - # Prerequisites
 
-   - Python 3.2 or higher with pip pakage manager 
+   - Python 3.6 < 3.9 (NOTE: PYTHON 3.10 DOES NOT WORK), pip pakage manager 
    - Linux or Windows system
 
  - ## Installation
