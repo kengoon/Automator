@@ -2,4 +2,5 @@ pyscreenshot
 psutil
 kivy
 kivy-md
-win32toast
+cython
+win10toast
