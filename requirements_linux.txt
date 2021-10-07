@@ -2,3 +2,4 @@ pyscreenshot
 psutil
 kivy
 kivy-md
+cython
