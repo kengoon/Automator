@@ -38,14 +38,16 @@
 
    ### On Windows:
     
-    - You can downolad and extract this pakage.
+    - Downolad and extract this pakage.
+     
+      Run the <code>main.py</code> file and it will automatically install the dipendences.
    
-      After, Install the pakage dipendency by pip 
+      If it does not work, you can install the pakage dipendency by pip: 
      
       <code>pip install -r requirements_win32.txt</code>
 
     - If you have installed Visual Studio or VSCode you can copy this repository
-      and run the above pip command to install requirements 
+      and follow the above steps.
 
    ### MacOs X:
 
