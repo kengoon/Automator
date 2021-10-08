@@ -1,5 +1,6 @@
 pyscreenshot
 psutil
 kivy
-kivy-md
+kivymd
 cython
+elevate
