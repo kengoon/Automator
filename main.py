@@ -1,3 +1,28 @@
+import sys, os
+
+class PythonVersionNotSUpported(BaseException):
+    pass
+
+P_VERSION = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
+
+if not (3.6 <= float(P_VERSION) and float(P_VERSION) <= 3.9):
+    raise PythonVersionNotSUpported(
+        'Python version {} not supported. (interpreter at {})'.format(P_VERSION, sys.executable)
+        )
+else:
+    if sys.platform == 'win32':
+        from cases.process import execshproc
+        libs = execshproc('pip freeze')
+        reqiurement = ['Kivy', 'kivymd', 'Cython', 'psutil', 'win10toast']
+        missing = []
+
+        for i in reqiurement:
+            if libs.find(i) == -1:
+                missing.append(i)
+
+        if 'Kivy' in missing:
+            os.system('start /wait cmd /c pip install -r requirements_win32.txt')
+
 #essential app
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -5,12 +30,14 @@ from kivy.metrics import dp
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.logger import Logger
+from kivymd.uix.button import MDRaisedButton, MDTextButton
 from exceptions import Errors
 
 #kivy screens
 from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, FadeTransition
 
 #kivymd widget
+from kivy.uix.dropdown import DropDown
 from kivymd.uix.selectioncontrol import MDSwitch
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.label import MDLabel
@@ -26,7 +53,7 @@ from kivymd.uix.dialog import MDDialog
 from threading import Thread
 from datab.database import database
 from cases import start
-import sys
+import os, json, threading
 
 #Classe di widget già formattati
 class pakedWidget():
@@ -75,20 +102,23 @@ class pakedWidget():
 #Main class
 class UI(MDApp):
 
-    def _on_resize(self, *args):
-        Window.size = (800, 600)
-
     def build(self, *args):
+
+        os.chdir(os.path.dirname(__file__))
+        os.makedirs(os.path.join(os.getcwd(), 'tmp'))
+
+        r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'w')
+        r.write('{}')
+        r.close()
+        r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.startup'), 'w')
+        r.close()
 
         Logger.info('[GL          ] Attivo on_request_close e on_resize')
         Window.bind(on_request_close=self.on_request_close)
         Window.bind(on_resize=self._on_resize)
 
         Logger.info('[GL          ] carico design.kv')
-        if sys.platform == 'linux':
-            Builder.load_file('graphic/design.kv')
-        else:
-            Builder.load_file('graphic\\design.kv')
+        Builder.load_file(os.path.join(os.path.dirname(__file__), 'datab', 'graphic', 'design.kv'))
 
         Logger.info('[GL          ] creo UI.sm')
         UI.sm = ScreenManager(transition=FadeTransition())
@@ -102,15 +132,16 @@ class UI(MDApp):
         main_screen = Screen(name='main')
         main_screen.add_widget(widget=Screens.Main().build())
 
-        #Logger.info('[GL          ] creo settings screen')
-        #settings_screen = Screen(name='settings')
-        #settings_screen.add_widget(widget=Screens.Settings().build())
+        '''Logger.info('[GL          ] creo settings screen')
+        settings_screen = Screen(name='settings')
+        settings_screen.add_widget(widget=Screens.Settings().build())'''
 
         Logger.info('[GL          ] creo create_screen')
         create_screen = Screen(name='create_screen')
         create_screen.add_widget(widget=Screens.Create_Screen().build())
 
         Logger.info('[GL          ] aggiungo tutti gli schermi a UI.sm')
+        self.sm.add_widget(Screens.Loading_Screen(name='Loading_Screen'))
         self.sm.add_widget(main_screen)
         #self.sm.add_widget(settings_screen)
         self.sm.add_widget(Screens.Settings(name='settings'))
@@ -119,12 +150,20 @@ class UI(MDApp):
         Logger.info('[GL          ] creo menu per create_screen')
         self.build_menu(0, True)
 
+        Logger.info('[GL          ] mostro UI')
+
+        threading.Timer(1, self.stop_loading).start()
+        self.sm.current = 'Loading_Screen'
+
         Logger.info('[GL          ] imposto transizione')
         self.sm.transition = SlideTransition()
 
-        Logger.info('[GL          ] mostro UI')
+        os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.startup'))
 
         return self.sm
+
+    def stop_loading(self, *args):
+        UI.sm.current= 'main'
     
     def active_switch(self, *args):
         try:
@@ -212,9 +251,19 @@ class UI(MDApp):
                 ],'''
     
     def on_request_close(self, *args):
+        try:
+            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+        except FileNotFoundError:
+            pass
+
         database().get_data()
         data = database.data
         database().save_data(data=dict(data))
+        os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
+        os.removedirs(os.path.join(os.getcwd(), 'tmp'))
+
+    def _on_resize(self, *args):
+        Window.size = (800, 600)
 
     def callback(self, button):
         self.menu.caller = button
@@ -338,7 +387,8 @@ class UI(MDApp):
         
         for i in keys:
             sw = pakedWidget().switch()
-            #sw.bind(active=lambda *args: Errors.Advises().Deactivate_Adv())
+            sw.id = i
+            sw.bind(active=lambda *args: Errors.Advises().Deactivate_Adv(*args))
 
             if data[i]['active'] == 'True':  
                 sw.active = True
@@ -402,6 +452,9 @@ class UI(MDApp):
 #Classe di schermi
 class Screens:
 
+    class Loading_Screen(Screen):
+        pass
+
     class Main(Screen):
 
         def build(self):
@@ -425,8 +478,19 @@ class Screens:
             gl.add_widget(lbl)
             switch = MDSwitch()
             switch.active = UI().active_switch()
-            switch.bind(active=lambda *args: UI().change_theme_cls_theme_style())
+            switch.bind(active=UI().change_theme_cls_theme_style)
             gl.add_widget(switch)
+
+            lbl = MDLabel(text='language')
+            gl.add_widget(lbl)
+            drop = DropDown()
+            ita = MDRaisedButton(text='ita', on_press=lambda *args: print('pressed ita'))
+            drop.add_widget(ita)
+            engl = MDRaisedButton(text='engl', on_press=lambda *args: print('pressed engl'))
+            drop.add_widget(engl)
+            main_button = MDTextButton(text='chose')
+            main_button.bind(on_release=drop.open)
+            gl.add_widget(main_button)
 
             for i in range(0,10):
                 gl.add_widget(MDLabel(text='prova'))
@@ -482,11 +546,7 @@ class Screens:
 
 #Classe adibita al mostrare avvisi
 class Advises_Shower():
-
-    _dialog = None
-
-    def deactivate_alert(self):
-        print(Errors.Advises().Deactivate_Adv())
+    done = False
     
     def file_not_fount(self):
         pass
@@ -518,18 +578,66 @@ class Advises_Shower():
 
     def open(self, _dialog_build):
         try:
-            self._dialog = _dialog_build
-            self._dialog.open()
+            if not os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.startup')):
+                self._dialog = _dialog_build
+                self._dialog.open()
         except AttributeError:
             pass
         
-    def close_dialog(self, *args):
-        self._dialog = args[0]
-        self._dialog.dismiss()
+    def close_dialog(self, dialog,  sw, _continue, _on_request=False):
 
-        if args[1] == True:
-            print('disattivo')
+        tmp = open(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'), 'w')
+        tmp.close()
 
+        self._dialog = dialog
+        self.sw = sw
+        
+        if _on_request != True:
+            try:
+                self._dialog.dismiss()
+            except AttributeError:
+                pass
+
+            if _continue == True:
+                Errors.Advises().Deactivate_Adv(self.sw, deactivate=True)
+                self.close_tmp()
+                self.done = True
+                
+            else:
+                self.sw.active = True
+                self.done = True
+        
+        else:
+            if self.done != True:
+                self.sw.active = True
+
+        self.close_tmp()
+
+    def close_tmp(self):
+        try:
+            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+        except FileNotFoundError:
+            pass
+        
+        try:
+            id = self.sw.id
+            active = self.sw.active
+
+            r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'r')
+            js = json.loads(r.read())
+            r.close()
+
+            js[id] = active
+
+            js = json.dumps(js, ensure_ascii=True)
+
+            r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'w')
+            r.write(js)
+            r.close()
+        except AttributeError:
+            pass
+
+        self.done = False
 
 #metodo di boot              
 def bootstrap():
@@ -537,6 +645,17 @@ def bootstrap():
         from cases import process
         print(process.execshproc(sys.argv[1]))
         exit()
+
+    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime')) or os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting')):
+        try:
+            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
+        except FileNotFoundError:
+            pass
+
+        try:
+            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+        except FileNotFoundError:
+            pass
 
     import kivy
     kivy.require('2.0.0')
@@ -562,5 +681,16 @@ if __name__ =='__main__':
         bootstrap()
     except (KeyboardInterrupt):
         Logger.warning('Keyboard interrupt detected, abort')
+
+        try:
+            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
+        except FileNotFoundError:
+            pass
+
+        try:
+            os.removedirs(os.path.join(os.getcwd(), 'tmp'))
+        except FileExistsError:
+            pass
+
     except ChildProcessError as e:
         Logger.warning(e)

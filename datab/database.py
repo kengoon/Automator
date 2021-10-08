@@ -19,7 +19,7 @@ class database():
       
         else:
             database.PLATFORM = platform
-            database.PATH = os.path.join(os.getcwd(), 'datab','database.json')
+            database.PATH = os.path.join(os.getcwd(), 'datab','database.json') 
 
         logging.basicConfig(format='[%(levelname)-8s] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
@@ -36,13 +36,14 @@ class database():
           
     
     def send_notification(self, title, msg):
+        base_path = os.path.join(os.path.dirname(__file__), 'graphic')
         if self.PLATFORM == 'linux':
-            base_path = os.path.dirname(__file__)
             logo = os.path.join(base_path, 'Kivy_logo.png')
             os.system('notify-send -i "{}" "{}" "{}"'.format(logo, title, msg))
         else:
-            from win10toast import ToastNotifier   
-            ToastNotifier().show_toast(title, msg, threaded=True)
+            from win10toast import ToastNotifier
+            logo = os.path.join(base_path, 'Kivy_logo.ico')
+            ToastNotifier().show_toast(title, msg, icon_path=logo, threaded=True)
 
     def get_value(self, value):
         with open(self.PATH,'r') as f:
@@ -61,9 +62,8 @@ class database():
                 return None
         
 
-    def baseconfig():
-        data = {'cards':{},'settings':{}}
-        return data       
+    def get_langauge(self):
+        return self.get_settings()['langs'][self.get_settings()['lang']]  
 
     def reset(value='') -> str:
         if value == 'keys':
@@ -105,7 +105,7 @@ class database():
 
     def save_data(self, **kwargs):
         with open(self.PATH, 'w') as f:
-            json.dump(kwargs.get('data'), f, indent=6)
+            json.dump(kwargs.get('data'), f, indent=6, ensure_ascii=False)
             f.close()
         
         try:

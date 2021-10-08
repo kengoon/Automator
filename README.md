@@ -1,13 +1,14 @@
 # WELCOME TO AUTOMATOR BETA 
 
 ### This programm is able to create automations on your system.
-### This programm is only an experimantal release; infact it works very well on Windows wether in linux did not works always correctly
+### This programm is only an experimantal release; infact it works
+very well on Windows wether in linux did not works always correctly
 
 ### Aviable languages:
   * Italiano
   * Caming soon: English
 
-### Tested with those systems: 
+### Tested with these systems: 
   * windows10 (build 19043.1237)
   * ubuntu 20.04.03
   * raspbian 10 
@@ -15,7 +16,7 @@
 # Installation
  - # Prerequisites
 
-   - Python 3.6 < 3.9 (NOTE: PYTHON 3.10 DOES NOT WORK), pip pakage manager 
+   - Python 3.2 or higher with pip pakage manager 
    - Linux or Windows system
 
  - ## Installation
