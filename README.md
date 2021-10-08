@@ -20,21 +20,21 @@
 
  - ## Installation
 
-   ### On linux:
+   ### On Linux:
    
     - You can copy this repositry by the following command:
  
       <code>$ git clone "https://github.com/Davide255/Automator"</code>
-     
-      Next step is installing required pakages, you can install by pip 
-     
-      <code>pip install -r requirements_linux.txt</code>
-     
-    - You can also download and unzip the repository
-
-      So install required pakages with pip
       
+      Install <code>gnome</code> by <code>$ sudo apt install gnome</code> command.
+     
+      Now run the main.py file that will install all the dipendency for you.
+      
+      If it does not work use pip to install them:
+     
       <code>pip install -r requirements_linux.txt</code>
+     
+    - You can also download and unzip the repository, so follow the above steps.
 
    ### On Windows:
     
