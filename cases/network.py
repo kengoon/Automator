@@ -1,16 +1,20 @@
-import time, os
-from cases import process
+import time, os, sys
+from cases.process import *
 
 def get_connected_ssid():
-    ret = process.execpowershellprocess('(get-netconnectionProfile).Name')
-    ret = ret.replace('\n', '')
-    ret = ret.replace('\r', '')
-    return ret
+    if sys.platform == 'linux':
+        ret = execshproc('/sbin/iwconfig wlan0 | grep ESSID')
+        print(ret)
+    else:
+        ret = execpowershellprocess('(get-netconnectionProfile).Name')
+        ret = ret.replace('\n', '')
+        ret = ret.replace('\r', '')
+        return ret
 
 def connect(parms, ret=None):
     network = parms
 
-    out = process.execshproc('netsh wlan show networks', array=True, sep='\n')
+    out = execshproc('netsh wlan show networks', array=True, sep='\n')
     for i in out:
         if network in i:
             os.system('netsh wlan disconnect')
@@ -22,7 +26,7 @@ def connect(parms, ret=None):
     exit()
 
 def main(is5gz):
- all = process.getallprocs()
+ all = getallprocs()
  disconnect = False
  programs = ['EpicGamesLauncher.exe', 'Battle.net.exe', 'EAConnect_microsoft.exe', 'EADesktop.exe', 'chrome.exe']
  games = ['Fortnite.exe', 'ForzaHorizon4.exe']
@@ -31,7 +35,7 @@ def main(is5gz):
     for g in games:
         if g in i:
             if is5gz:
-                if process.forpriority(priority, all):
+                if forpriority(priority, all):
                     connect('2gz')
             return False
 
@@ -39,7 +43,7 @@ def main(is5gz):
     for p in programs:
         if p in i:
             if is5gz != True:
-                if process.forpriority(priority, all):
+                if forpriority(priority, all):
                     connect('5gz')
             return True
                        
@@ -47,20 +51,9 @@ def main(is5gz):
         disconnect = True
             
  if is5gz == True & disconnect == True:
-    if process.forpriority(priority, all):
+    if forpriority(priority, all):
         connect('2gz')
     return False
 
-'''def bootstrap():
-        while True:
-          if database.pause != False:  
-            is5gz = main(False)
-            time.sleep(10)
-            while is5gz == True:
-              if database.pause != False:
-                is5gz = main(is5gz)
-                time.sleep(10)
-              else:
-                time.sleep(10)
-          else:
-            time.sleep(10)'''
+if __name__ == '__main__':
+    get_connected_ssid()

@@ -55,11 +55,19 @@ class Advises():
             if self.not_activate == False:
 
                 text = database().get_langauge()['advises_shower.deactivate_adv.button']
-                hint = database().get_langauge()['advises_shower.deactivate_adv']
+                try:
+                    hint_title = database().get_langauge()['advises_shower.deactivate_adv']['title'].encode('latin1').decode('utf-8')
+                except UnicodeError:
+                    hint_title = database().get_langauge()['advises_shower.deactivate_adv']['title']
+                
+                try:
+                    hint_text = database().get_langauge()['advises_shower.deactivate_adv']['text'].encode('latin1').decode('utf-8')
+                except UnicodeError:
+                    hint_text = database().get_langauge()['advises_shower.deactivate_adv']['text']
 
                 self.dialog = MDDialog(
-                        title= hint['title'].encode('latin1').decode('utf-8'),
-                        text= hint['text'].encode('latin1').decode('utf-8'),
+                        title= hint_title,
+                        text= hint_text,
                         buttons= [
                             MDFlatButton(
                                 text=text[0],

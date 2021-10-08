@@ -10,18 +10,25 @@ if not (3.6 <= float(P_VERSION) and float(P_VERSION) <= 3.9):
         'Python version {} not supported. (interpreter at {})'.format(P_VERSION, sys.executable)
         )
 else:
-    if sys.platform == 'win32':
-        from cases.process import execshproc
-        libs = execshproc('pip freeze')
-        reqiurement = ['Kivy', 'kivymd', 'Cython', 'psutil', 'win10toast']
-        missing = []
+    from cases.process import execshproc
+    libs = execshproc('pip freeze')
+    reqiurement = ['Kivy', 'kivymd', 'Cython', 'psutil']
+    missing = []
 
-        for i in reqiurement:
-            if libs.find(i) == -1:
-                missing.append(i)
+    for i in reqiurement:
+        if libs.find(i) == -1:
+            missing.append(i)
 
-        if 'Kivy' in missing:
+    if 'Kivy' in missing or 'kivymd' in missing:
+
+        if sys.platform == 'linux':
+            execshproc('gnome-terminal  --disable-factory -- pip install -r requirements_linux.txt')
+    
+        else:
+        
             os.system('start /wait cmd /c pip install -r requirements_win32.txt')
+         
+
 
 #essential app
 from kivymd.app import MDApp
@@ -52,7 +59,7 @@ from kivymd.uix.dialog import MDDialog
 #other components
 from threading import Thread
 from datab.database import database
-from cases import start
+from cases import process, start
 import os, json, threading
 
 #Classe di widget già formattati
@@ -105,7 +112,10 @@ class UI(MDApp):
     def build(self, *args):
 
         os.chdir(os.path.dirname(__file__))
-        os.makedirs(os.path.join(os.getcwd(), 'tmp'))
+        try:
+            os.makedirs(os.path.join(os.getcwd(), 'tmp'))
+        except FileExistsError:
+            pass
 
         r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'w')
         r.write('{}')
