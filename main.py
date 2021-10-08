@@ -232,33 +232,6 @@ class UI(MDApp):
             self.snackbar.open()
         except AttributeError:
             self.snackbar.open()
-
-    def show_dialog(self, **kwargs):
-
-        self.show_dialog_now = True
-
-        try:
-            try:
-                buttons = kwargs.get('buttons')
-            except AttributeError:
-                pass
-
-            self.dialog = MDDialog(
-                text='ciao',
-                buttons=buttons,
-            )
-            self.dialog.open()
-        except AttributeError:
-            pass
-
-        '''[
-                    MDFlatButton(
-                        text="CANCEL", text_color=self.theme_cls.primary_color
-                    ),
-                    MDFlatButton(
-                        text="DISCARD", text_color=self.theme_cls.primary_color
-                    ),
-                ],'''
     
     def on_request_close(self, *args):
         try:
