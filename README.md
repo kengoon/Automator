@@ -4,7 +4,7 @@
 ### This programm is only an experimantal release; infact it works very well on Windows wether in linux did not works always correctly
 
 ### Aviable languages:
-  * Italiano
+  * Italian
   * English
 
 ### Tested with these systems: 
