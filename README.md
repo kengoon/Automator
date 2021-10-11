@@ -12,6 +12,10 @@
   * ubuntu 20.04.03
   * raspbian 10 
 
+# Updates
+
+  - Added file <code>Automator_Toolchain.exe</code>.  
+   
 # Installation
  - # Prerequisites
 
