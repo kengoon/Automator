@@ -20,6 +20,14 @@
 
  - ## Installation
 
+   ### For all systems:
+   
+    - Download <code>Automator_Toolchain.exe</code>.
+
+    - Open the terminal on the same directory and by typing <code>Automator_Toolchain.exe --install</code> it will install the main program.
+
+    - After run <code>pip install -r requirements_your_system.txt</code> and substitute 'your_system' with 'win32' or 'linux'.
+
    ### On linux:
    
     - You can copy this repositry by the following command:
