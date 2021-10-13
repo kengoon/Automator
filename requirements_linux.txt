@@ -3,4 +3,3 @@ psutil
 kivy
 kivymd
 cython
-elevate
