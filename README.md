@@ -35,8 +35,6 @@
     - You can copy this repositry by the following command:
  
       <code>$ git clone "https://github.com/Davide255/Automator"</code>
-         
-      Install <code>gnome</code> by <code>$ sudo apt install gnome</code> command.
      
       Now run the main.py file that will install all the dipendency for you.
 
@@ -50,13 +48,9 @@
     
     - Downolad and extract this pakage.
      
-      Run the <code>main.py</code> file and it will automatically install the dipendences.
-   
-      If it does not work, you can install the pakage dipendency by pip: 
+    - Install the pakage dipendency by pip: 
      
       <code>pip install -r requirements_win32.txt</code>
-      
-      Restart the program.
 
     - If you have installed Visual Studio or VSCode you can copy this repository
       and follow the above steps.
