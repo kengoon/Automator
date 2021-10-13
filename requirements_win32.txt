@@ -4,4 +4,3 @@ kivy
 kivymd
 cython
 pywin32
-elevate
