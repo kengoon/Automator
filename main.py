@@ -1,42 +1,33 @@
-import sys, os
+import sys, os, argparse
+parser = argparse.ArgumentParser(description='Set of options for Automator Program')
 
+parser.add_argument('-d', action='store_true', dest='debug',help='set logger to Debaug mode')
+
+args = parser.parse_args()
+
+#Base Exception 
 class PythonVersionNotSUpported(BaseException):
     pass
 
+#Python Version
 P_VERSION = '{}.{}'.format(sys.version_info.major, sys.version_info.minor)
 
 if not (3.6 <= float(P_VERSION) and float(P_VERSION) <= 3.9):
     raise PythonVersionNotSUpported(
         'Python version {} not supported. (interpreter at {})'.format(P_VERSION, sys.executable)
         )
-else:
-    from cases.process import execshproc
-    libs = execshproc('pip freeze')
-    reqiurement = ['Kivy', 'kivymd', 'Cython', 'psutil']
-    missing = []
 
-    for i in reqiurement:
-        if libs.find(i) == -1:
-            missing.append(i)
-
-    if 'Kivy' in missing or 'kivymd' in missing:
-
-        if sys.platform == 'linux':
-            execshproc('gnome-terminal  --disable-factory -- pip install -r requirements_linux.txt')
-    
-        else:
-        
-            os.system('start /wait cmd /c pip install -r requirements_win32.txt')
-         
-
-
+#Setting kivy no args
+os.environ['KIVY_NO_ARGS'] = '1'
 #essential app
+from kivy.logger import Logger
+if args.debug:
+    Logger.setLevel('DEBUG')
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.config import Config
 from kivy.core.window import Window
-from kivy.logger import Logger
 from kivymd.uix.button import MDRaisedButton, MDTextButton
 from exceptions import Errors
 
@@ -245,9 +236,6 @@ class UI(MDApp):
         os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
         os.removedirs(os.path.join(os.getcwd(), 'tmp'))
 
-    def _on_resize(self, *args):
-        Window.size = (800, 600)
-
     def callback(self, button):
         self.menu.caller = button
         self.menu.open()
@@ -428,9 +416,10 @@ class UI(MDApp):
 
     def _on_minimize(*args):
         database.send_notification('prova', 'prova')
+        pass
 
-    def create_new(self, *args):
-        self.build_menu(*args)
+    def _on_resize(self, *args):
+        Window.size = (800, 600)
 
 #Classe di schermi
 class Screens:
@@ -624,10 +613,6 @@ class Advises_Shower():
 
 #metodo di boot              
 def bootstrap():
-    if len(sys.argv) > 1:
-        from cases import process
-        print(process.execshproc(sys.argv[1]))
-        exit()
 
     if os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime')) or os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting')):
         try:
@@ -641,6 +626,7 @@ def bootstrap():
             pass
 
     import kivy
+    
     kivy.require('2.0.0')
     Config.set('kivy', 'keyboard_mode', 'systemandmulti')
 
@@ -655,7 +641,6 @@ def bootstrap():
     th.setDaemon(True)
     th.start()
     UI().run()
-
 
 #Entry point
 if __name__ =='__main__':

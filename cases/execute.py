@@ -13,20 +13,23 @@ class Execute():
             
             for i in self.actions[n]:
                 if i == automatism[0]:
-                    self.Battery().load(self.actions[n])
+                    self.Battery(self.actions[n])
                 elif i == automatism[1]:
-                    self.Network().load(self.actions[n])
+                    self.Network(self.actions[n])
                 elif i == automatism[2]:
-                    self.Process().load(self.actions[n])
+                    self.Process(self.actions[n])
                 elif i == automatism[3]:
                     Attuator(Execute.do)
                 elif i == automatism[4]:
-                    self.System().load(self.actions[n])
+                    self.System(self.actions[n])
 
             n+=1
 
     class Battery():
-        batter = ['level', 'plugged', 'not_plugged']
+
+        def __init__(self, action: list) -> None:
+            self.load(action)
+            self.batter = ['level', 'plugged', 'not_plugged']
 
         def load(self, action: list):
             for i in Execute.Battery.batter:
@@ -55,7 +58,10 @@ class Execute():
                 return False
 
     class Network():
-        net = ['is_connected']
+        def __init__(self, action: list) -> None:
+            self.load(action)
+            self.net = ['is_connected']
+
         def load(self, action: list):
             for i in Execute.Network.net:
                 if action[1] == i:
@@ -73,7 +79,9 @@ class Execute():
         
 
     class Process():
-        proc = ['is_running']
+        def __init__(self, action: list) -> None:
+            self.load(action)
+            self.proc = ['is_running']
 
         def load(self, action: list):
 
@@ -103,7 +111,9 @@ class Execute():
 
 
     class System():
-        _sys = ['idle_timeout']
+        def __init__(self, action: list) -> None:
+            self.load(action)
+            self._sys = ['idle_timeout']
 
         def load(self, action: list):
             from cases.system import System
@@ -233,8 +243,14 @@ class Attuator():
     class System():
         def load(self, attuators: list):
             from cases import process
-            index = ['reboot', 'look', 'shotdown', 'logoff', 'personal_cmd', 'take_screenshot', 'send_notification']
-            cmds = {'reboot': {'win32':'Restart-Computer', 'linux':'shutdown -r 0'}, 'look': {'win32':'rundll32.exe user32.dll,LockWorkStation', 'linux':'gnome-screensaver\ngnome-screensaver-command -l'}, 'logoff': {'win32':'shutdown.exe -l', 'linux':'logout'}, 'shotdown':{'win32':'Stop-Computer', 'linux':'shutdown -h 0'}}
+            import win32api
+            index = ['reboot', 'look', 'shotdown', 'logoff', 'hibernate', 'suspend', 'personal_cmd', 'take_screenshot', 'send_notification']
+            cmds = {'reboot': {'win32':'Restart-Computer', 'linux':'shutdown -r 0'}, 
+                    'look': {'win32':'rundll32.exe user32.dll,LockWorkStation', 'linux':'gnome-screensaver\ngnome-screensaver-command -l'}, 
+                    'logoff': {'win32':'shutdown.exe -l', 'linux':'logout'}, 
+                    'shotdown':{'win32':'Stop-Computer', 'linux':'shutdown -h 0'}, 
+                    'suspend':{'win32':self.suspend}, 
+                    'hibernate':{'win32':self.suspend}}
 
             self.attuators = attuators
 
@@ -250,11 +266,17 @@ class Attuator():
                         database().send_notification(self.attuators[2]['title'], self.attuators[2]['msg'])
 
                     else:
-                        if self.force():
-                            cmd = cmds[i] + ' -Force'
-                            process.execpowershellprocess(cmd)
+                        if callable(cmd[i]['win32']):
+                            if i == 'hibernate':
+                                cmd[i]['win32'](False)
+                            elif i == 'suspend':
+                                cmd[i]['win32'](True)
                         else:
-                            process.execpowershellprocess(cmds[i])
+                            if self.force():
+                                cmd = cmds[i] + ' -Force'
+                                process.execpowershellprocess(cmd)
+                            else:
+                                process.execpowershellprocess(cmds[i])
 
         
         def force(self):
@@ -265,6 +287,47 @@ class Attuator():
                 return False
           except IndexError:
               return False
+
+        def suspend(hibernate=False):
+            import win32api, win32security,ctypes
+
+            # Enable the SeShutdown privilege (which must be present in your
+            # token in the first place)
+            priv_flags = (win32security.TOKEN_ADJUST_PRIVILEGES |
+                        win32security.TOKEN_QUERY)
+            hToken = win32security.OpenProcessToken(
+                win32api.GetCurrentProcess(),
+                priv_flags
+            )
+            priv_id = win32security.LookupPrivilegeValue(
+            None,
+            win32security.SE_SHUTDOWN_NAME
+            )
+            old_privs = win32security.AdjustTokenPrivileges(
+                hToken,
+                0,
+                [(priv_id, win32security.SE_PRIVILEGE_ENABLED)]
+            )
+
+            if (win32api.GetPwrCapabilities()['HiberFilePresent'] == False and
+                hibernate == True):
+                    import warnings
+                    warnings.warn("Hibernate isn't available. Suspending.")
+            try:
+                ctypes.windll.powrprof.SetSuspendState(not hibernate, True, False)
+            except:
+                # True=> Standby; False=> Hibernate
+                # https://msdn.microsoft.com/pt-br/library/windows/desktop/aa373206(v=vs.85).aspx
+                # says the second parameter has no effect.
+        #        ctypes.windll.kernel32.SetSystemPowerState(not hibernate, True)
+                win32api.SetSystemPowerState(not hibernate, True)
+
+            # Restore previous privileges
+            win32security.AdjustTokenPrivileges(
+                hToken,
+                0,
+                old_privs
+            )
 
 
 mail_corpus = {

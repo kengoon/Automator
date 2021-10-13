@@ -19,7 +19,7 @@ def getallprocs():
 
 def execshproc(proc, array=False, sep=' '):
     proc = proc.split(' ')
-    cmd_out = subprocess.run(proc, stdout=subprocess.PIPE).stdout.decode('utf8')
+    cmd_out = subprocess.run(proc, stdin=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE).stdout.decode('utf8')
     if array == True:
         return cmd_out.split(sep)
     else:
