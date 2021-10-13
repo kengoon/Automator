@@ -36,9 +36,7 @@
  
       <code>$ git clone "https://github.com/Davide255/Automator"</code>
      
-      Now run the main.py file that will install all the dipendency for you.
-
-      If it does not work use pip to install them:
+      Now run the following pip command to install the requirements:
      
       <code>pip install -r requirements_linux.txt</code>
      
