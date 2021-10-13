@@ -2,7 +2,6 @@ pyscreenshot
 psutil
 kivy
 kivymd
-win10toast
 cython
 pywin32
 elevate
