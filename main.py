@@ -1,4 +1,5 @@
-import sys, os, argparse
+import sys, os, argparse, time, win32gui, win32con
+
 parser = argparse.ArgumentParser(description='Set of options for Automator Program')
 
 parser.add_argument('-d', action='store_true', dest='debug',help='set logger to Debaug mode')
@@ -21,9 +22,11 @@ if not (3.6 <= float(P_VERSION) and float(P_VERSION) <= 3.9):
 os.environ['KIVY_NO_ARGS'] = '1'
 #essential app
 from kivy.logger import Logger
+
 if args.debug:
     Logger.setLevel('DEBUG')
 from kivymd.app import MDApp
+
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.config import Config
@@ -50,8 +53,9 @@ from kivymd.uix.dialog import MDDialog
 #other components
 from threading import Thread
 from datab.database import database
-from cases import process, start
+from cases import start
 import os, json, threading
+from datab.env_vars import *
 
 #Classe di widget già formattati
 class pakedWidget():
@@ -102,24 +106,24 @@ class UI(MDApp):
 
     def build(self, *args):
 
-        os.chdir(os.path.dirname(__file__))
         try:
-            os.makedirs(os.path.join(os.getcwd(), 'tmp'))
+            os.makedirs('tmp')
         except FileExistsError:
             pass
 
-        r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'w')
+        r = open('tmp\\.runtime', 'w')
         r.write('{}')
         r.close()
-        r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.startup'), 'w')
+        r = open('tmp\\.startup', 'w')
         r.close()
 
         Logger.info('[GL          ] Attivo on_request_close e on_resize')
         Window.bind(on_request_close=self.on_request_close)
         Window.bind(on_resize=self._on_resize)
+        Window.bind(on_minimize=self.on_request_close)
 
         Logger.info('[GL          ] carico design.kv')
-        Builder.load_file(os.path.join(os.path.dirname(__file__), 'datab', 'graphic', 'design.kv'))
+        Builder.load_string(DESIGN)
 
         Logger.info('[GL          ] creo UI.sm')
         UI.sm = ScreenManager(transition=FadeTransition())
@@ -159,7 +163,7 @@ class UI(MDApp):
         Logger.info('[GL          ] imposto transizione')
         self.sm.transition = SlideTransition()
 
-        os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.startup'))
+        os.remove('tmp\\.startup')
 
         return self.sm
 
@@ -225,16 +229,23 @@ class UI(MDApp):
             self.snackbar.open()
     
     def on_request_close(self, *args):
+        Window.close()
         try:
-            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+            os.remove('tmp\\.switch_acting')
         except FileNotFoundError:
             pass
 
         database().get_data()
         data = database.data
         database().save_data(data=dict(data))
-        os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
-        os.removedirs(os.path.join(os.getcwd(), 'tmp'))
+        try:
+            os.remove('tmp\\.runtime')
+        except FileNotFoundError:
+            pass
+        try:
+            os.removedirs('tmp')
+        except FileNotFoundError:
+            pass
 
     def callback(self, button):
         self.menu.caller = button
@@ -414,12 +425,21 @@ class UI(MDApp):
 
         return sv
 
-    def _on_minimize(*args):
-        database.send_notification('prova', 'prova')
-        pass
-
     def _on_resize(self, *args):
         Window.size = (800, 600)
+
+    def eleve(self):
+        if database().get_settings()['theme_style'] == 'Light':
+            Window.raise_window()
+        else:
+            win32gui.MessageBox(0, 'Caanot Raise_window because dark theme is active', 'THEME ERROR', win32con.MB_OK)
+
+class SecondaryWindow(MDApp):
+    def build(self):
+        return Builder.load_string('''
+Label:
+    text: 'prova'
+        ''')
 
 #Classe di schermi
 class Screens:
@@ -516,6 +536,9 @@ class Screens:
 
             UI().build_menu('main', True)
 
+class StopApplication(BaseException):
+    pass
+
 #Classe adibita al mostrare avvisi
 class Advises_Shower():
     done = False
@@ -550,7 +573,7 @@ class Advises_Shower():
 
     def open(self, _dialog_build):
         try:
-            if not os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.startup')):
+            if not os.path.isfile('tmp\\.startup'):
                 self._dialog = _dialog_build
                 self._dialog.open()
         except AttributeError:
@@ -558,7 +581,7 @@ class Advises_Shower():
         
     def close_dialog(self, dialog,  sw, _continue, _on_request=False):
 
-        tmp = open(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'), 'w')
+        tmp = open('tmp\\.switch_acting', 'w')
         tmp.close()
 
         self._dialog = dialog
@@ -587,7 +610,7 @@ class Advises_Shower():
 
     def close_tmp(self):
         try:
-            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+            os.remove('tmp\\.switch_acting')
         except FileNotFoundError:
             pass
         
@@ -595,7 +618,7 @@ class Advises_Shower():
             id = self.sw.id
             active = self.sw.active
 
-            r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'r')
+            r = open('tmp\\.runtime', 'r')
             js = json.loads(r.read())
             r.close()
 
@@ -603,7 +626,7 @@ class Advises_Shower():
 
             js = json.dumps(js, ensure_ascii=True)
 
-            r = open(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'), 'w')
+            r = open('tmp\\.runtime', 'w')
             r.write(js)
             r.close()
         except AttributeError:
@@ -611,17 +634,51 @@ class Advises_Shower():
 
         self.done = False
 
+from infi.systray import SysTrayIcon
+is_t_alive = True
+class SysTray(SysTrayIcon):
+
+    def t_on_quit(self, *args):
+        os._exit(0)
+
+    def __init__(self, icon='logo.ico', hover_text='Automator', menu_options=None, on_quit=t_on_quit, default_menu_index=None, window_class_name=None):      
+        super().__init__(icon, hover_text, menu_options=menu_options, on_quit=on_quit, default_menu_index=default_menu_index, window_class_name=window_class_name)
+
+    def run(self):
+        self._message_loop_thread = Thread(target=self._message_loop_func, daemon=True)
+        self._message_loop_thread.start()
+
+def resume_window(*args):
+    '''if os.path.isfile('tmp\\.runtime'):
+        UI().eleve()
+    else:
+        win32gui.MessageBox(0, 'This function will be implemented soon', 'INFO', win32con.MB_OK)'''
+
+    #such as kivi.core.window.windowbase suggest
+    import kivy.core.gl
+
+    Window.create_window()
+    Window.register()
+    Window.configure_keyboards()
+
+    SecondaryWindow().run()
+
+
 #metodo di boot              
 def bootstrap():
 
-    if os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime')) or os.path.isfile(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting')):
+    menu_options = (("Open Automator", None, resume_window),)
+    systray = SysTray("logo.ico", "Automator", menu_options)
+    systray.run()
+
+    if os.path.isfile('tmp\\.runtime') or os.path.isfile('tmp\\.switch_acting'):
         try:
-            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.runtime'))
+            os.remove('tmp\\.runtime')
         except FileNotFoundError:
             pass
 
         try:
-            os.remove(os.path.join(os.path.dirname(__file__), 'tmp', '.switch_acting'))
+            os.remove('tmp\\.switch_acting')
         except FileNotFoundError:
             pass
 
@@ -647,6 +704,15 @@ if __name__ =='__main__':
     PLATFORM = None
     try:
         bootstrap()
+
+        database().send_notification('Automator', 'il programma è ancora in esecuzione')
+
+        try:
+            while is_t_alive != False:
+                time.sleep(15)
+        except StopApplication:
+            sys.exit(1)
+
     except (KeyboardInterrupt):
         Logger.warning('Keyboard interrupt detected, abort')
 
@@ -657,7 +723,7 @@ if __name__ =='__main__':
 
         try:
             os.removedirs(os.path.join(os.getcwd(), 'tmp'))
-        except FileExistsError:
+        except FileNotFoundError:
             pass
 
     except ChildProcessError as e:

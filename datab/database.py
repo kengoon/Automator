@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 # standard library
-import logging, threading, os, json
+import logging, threading, os, json, uuid
 from time import sleep
 from pkg_resources import Requirement, resource_filename
 
@@ -12,7 +12,6 @@ class database():
     returnv = False
     pause = False
     dynamic_key_stop = False
-    data = {}
     PATH = 'datab\\database.json' 
 
     if not os.path.isdir('datab'):
@@ -135,12 +134,12 @@ class Notifier(object):
         # Register the window class.
         self.wc = WNDCLASS()
         self.hinst = self.wc.hInstance = GetModuleHandle(None)
-        self.wc.lpszClassName = str("PythonTaskbar")  # must be a string
+        self.wc.lpszClassName = str(f"PythonTaskbar {uuid.uuid4()}")  # must be a string
         self.wc.lpfnWndProc = message_map  # could also specify a wndproc.
         try:
             self.classAtom = RegisterClass(self.wc)
-        except:
-            pass #not sure of thisa
+        except Exception as e:
+            print(e)
 
         style = WS_OVERLAPPED | WS_SYSMENU
         self.hwnd = CreateWindow(self.classAtom, "Taskbar", style,
@@ -165,13 +164,13 @@ class Notifier(object):
 
         # Taskbar icon
         flags = NIF_ICON | NIF_MESSAGE | NIF_TIP
-        nid = (self.hwnd, 0, flags, WM_USER + 20, hicon, "Tooltip")
+        nid = (self.hwnd, 0, flags, WM_USER + 20, hicon, "Automator")
         Shell_NotifyIcon(NIM_ADD, nid)
         Shell_NotifyIcon(NIM_MODIFY, (self.hwnd, 0, NIF_INFO,
                                       WM_USER + 20,
                                       hicon, "Balloon Tooltip", msg, 200,
                                       title))
-        # take a rest then destroy
+
         sleep(duration)
         DestroyWindow(self.hwnd)
         UnregisterClass(self.wc.lpszClassName, None)

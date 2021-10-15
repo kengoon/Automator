@@ -68,4 +68,3 @@ The main programm create a Thread that observe your system and it does actions c
 - [CRITICAL] [Cutbuffer ] Unable to find any valuable Cutbuffer provider. (Appared on Ubuntu 20.04.03)
     
   **Fix by installing xclip and xsel (<code>$ sudo apt-get install xclip xsel</code>)**
-
