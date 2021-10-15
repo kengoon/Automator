@@ -434,6 +434,7 @@ class UI(MDApp):
         else:
             win32gui.MessageBox(0, 'Caanot Raise_window because dark theme is active', 'THEME ERROR', win32con.MB_OK)
 
+#classe di prova
 class SecondaryWindow(MDApp):
     def build(self):
         return Builder.load_string('''
@@ -579,7 +580,7 @@ class Advises_Shower():
         except AttributeError:
             pass
         
-    def close_dialog(self, dialog,  sw, _continue, _on_request=False):
+    def close_dialog(self, dialog,  sw, _continue, _on_request=False): # <- This method contain a bug
 
         tmp = open('tmp\\.switch_acting', 'w')
         tmp.close()
@@ -654,6 +655,8 @@ def resume_window(*args):
     else:
         win32gui.MessageBox(0, 'This function will be implemented soon', 'INFO', win32con.MB_OK)'''
 
+    # HOW CAN I CREATE A NEW WINDOW???
+    
     #such as kivi.core.window.windowbase suggest
     import kivy.core.gl
 
